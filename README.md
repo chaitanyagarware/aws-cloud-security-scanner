@@ -203,19 +203,25 @@ The Markdown report includes:
 
 ## Architecture
 
-The project is organized around small, separate components:
-
-```text
-src/cloudsec_aws_lab/
-  analyzers/        # IAM, CloudTrail, GuardDuty, Access Analyzer analysis
-  reporting/        # Markdown, JSON, SARIF, ASFF, OCSF outputs
-  correlation/      # Multi-source identity/resource correlation
-  config/           # YAML config, suppressions, severity overrides
-  state/            # SQLite finding state and deduplication
-  remediation/      # Least-privilege and Terraform remediation helpers
-  integrations/     # Optional AWS API integrations
-  cli.py            # Main command-line interface
+```mermaid
+flowchart LR
+    IAM[IAM policies] --> A[Analyzer CLI]
+    CT[CloudTrail events] --> A
+    GD[GuardDuty findings] --> A
+    AA[IAM Access Analyzer JSON] --> A
+    CFG[YAML config: regions, allowlists, sensitive actions] --> A
+    A --> R[Risk model + correlation]
+    R --> MD[Markdown executive report]
+    R --> JSON[Structured JSON]
+    R --> SARIF[SARIF for GitHub code scanning]
+    R --> ASFF[ASFF-shaped Security Hub output]
+    R --> OCSF[OCSF-like security lake output]
+    R --> MITRE[MITRE ATT&CK mapping]
+    R --> STATE[SQLite finding state]
+    R --> LP[Least-privilege draft policies]
+    JSON --> UI[Streamlit dashboard]
 ```
+
 
 The basic flow is:
 
