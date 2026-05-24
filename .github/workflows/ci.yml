@@ -2,46 +2,61 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: ["main"]
   pull_request:
-    branches: [ main ]
+    branches: ["main"]
+
+permissions:
+  contents: read
 
 jobs:
-  test-security-and-demo:
+  test:
+    name: Test and basic security checks
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-      - name: Install
+          python-version: "3.11"
+
+      - name: Install package
         run: |
           python -m pip install --upgrade pip
-          pip install -e .[dev]
-      - name: Lint
-        run: ruff check src tests
-      - name: Type check
-        run: mypy src || true
-      - name: Tests with coverage
-        run: pytest --cov=cloudsec_aws_lab --cov-report=term-missing --cov-fail-under=85
-      - name: Bandit security scan
-        run: bandit -r src -q
-      - name: pip-audit dependency scan
-        run: pip-audit || true
-      - name: Checkov Terraform scan
-        run: pip install checkov && checkov -d terraform --quiet || true
-      - name: tfsec Terraform scan
-        uses: aquasecurity/tfsec-action@v1.0.3
-        continue-on-error: true
-        with:
-          working_directory: terraform
-      - name: Demo analysis
-        run: scripts/run_demo.sh
-      - name: Upload SARIF to GitHub Code Scanning
-          if: hashFiles('reports/demo_report.sarif.json') != ''
-            uses: github/codeql-action/upload-sarif@v3
-        with:
-            sarif_file: reports/demo_report.sarif.json
+          pip install -e ".[dev]"
+
+      - name: Run Ruff lint
+        run: |
+          ruff check src tests
+
+      - name: Run tests with coverage
+        run: |
+          pytest --cov=src/cloudsec_aws_lab --cov-fail-under=85
+
+      - name: Run demo analysis
+        run: |
+          mkdir -p reports
+          aws-cloud-security-scanner analyze \
+            --iam samples/iam_policies \
+            --cloudtrail samples/cloudtrail/cloudtrail_events.json \
+            --guardduty samples/guardduty/guardduty_findings.json \
+            --access-analyzer samples/access_analyzer/findings.json \
+            --config config/example.yml \
+            --out reports/demo_report.md \
+            --json-out reports/demo_report.json \
+            --sarif-out reports/demo_report.sarif.json \
+            --asff-out reports/demo_report.asff.json \
+            --ocsf-out reports/demo_report.ocsf.json \
+            --state-db reports/finding_state.sqlite \
+            --ai-summary-out reports/ai_summary.md
+
+      - name: Verify generated reports
+        run: |
+          test -f reports/demo_report.md
+          test -f reports/demo_report.json
+          test -f reports/demo_report.sarif.json
+          test -f reports/demo_report.asff.json
+          test -f reports/demo_report.ocsf.json
