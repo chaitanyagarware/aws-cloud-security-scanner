@@ -41,7 +41,7 @@ jobs:
       - name: Demo analysis
         run: scripts/run_demo.sh
       - name: Upload SARIF to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
+          if: hashFiles('reports/demo_report.sarif.json') != ''
+            uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: reports/demo_report.sarif.json
+            sarif_file: reports/demo_report.sarif.json
