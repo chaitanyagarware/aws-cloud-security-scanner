@@ -1,0 +1,38 @@
+{
+  "findings": [
+    {
+      "schemaVersion": "2.0",
+      "id": "sample-finding-1",
+      "type": "UnauthorizedAccess:IAMUser/InstanceCredentialExfiltration.OutsideAWS",
+      "severity": 8.2,
+      "title": "Instance credentials used outside AWS",
+      "description": "Credentials associated with an EC2 instance role were observed being used from an external IP address.",
+      "resource": {
+        "resourceType": "AccessKey",
+        "accessKeyDetails": {
+          "principalId": "AROASAMPLE:app-server",
+          "userName": "app-server-role"
+        }
+      },
+      "service": {
+        "eventFirstSeen": "2026-05-20T16:00:00Z",
+        "eventLastSeen": "2026-05-20T16:05:00Z"
+      }
+    },
+    {
+      "schemaVersion": "2.0",
+      "id": "sample-finding-2",
+      "type": "Policy:IAMUser/RootCredentialUsage",
+      "severity": 3.0,
+      "title": "Root credentials used",
+      "description": "Root credentials were used to make AWS API calls.",
+      "resource": {
+        "resourceType": "AccessKey",
+        "accessKeyDetails": {
+          "principalId": "123456789012",
+          "userName": "root"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+[console_scripts]
+aws-cloud-security-scanner = cloudsec_aws_lab.cli:main
+cloudsec-aws-lab = cloudsec_aws_lab.cli:main

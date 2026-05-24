@@ -1,0 +1,32 @@
+name: AWS Cloud Security Scanner
+description: Run aws-cloud-security-scanner against repo samples/IaC and upload SARIF artifact
+inputs:
+  cloudtrail:
+    description: Path to CloudTrail JSON/JSONL
+    required: false
+    default: samples/cloudtrail/cloudtrail_events.json
+  guardduty:
+    description: Path to GuardDuty findings JSON
+    required: false
+    default: samples/guardduty/guardduty_findings.json
+  iam:
+    description: Path to IAM policy JSON file or directory
+    required: false
+    default: samples/iam_policies
+  config:
+    description: YAML config path
+    required: false
+    default: config/example.yml
+runs:
+  using: composite
+  steps:
+    - run: python -m pip install -e .
+      shell: bash
+    - run: >-
+        aws-cloud-security-scanner analyze
+        --iam "${{ inputs.iam }}"
+        --cloudtrail "${{ inputs.cloudtrail }}"
+        --guardduty "${{ inputs.guardduty }}"
+        --config "${{ inputs.config }}"
+        --sarif-out reports/aws-cloud-security-scanner.sarif.json
+      shell: bash

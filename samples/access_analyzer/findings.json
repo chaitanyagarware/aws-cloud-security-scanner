@@ -1,0 +1,18 @@
+{
+  "findings": [
+    {
+      "findingType": "SECURITY_WARNING",
+      "issueCode": "PASS_ROLE_WITH_STAR_IN_RESOURCE",
+      "findingDetails": "iam:PassRole is allowed on Resource *; scope the role ARNs and require iam:PassedToService conditions.",
+      "resource": "samples/iam_policies/risky_devops_policy.json",
+      "principal": "arn:aws:iam::123456789012:user/devops-user"
+    },
+    {
+      "findingType": "ERROR",
+      "issueCode": "EXTERNAL_PRINCIPAL_IN_TRUST_POLICY",
+      "findingDetails": "Trust policy allows a broad external principal without ExternalId.",
+      "resource": "samples/iam_policies/trust_policy_broad_principal.json",
+      "principal": "*"
+    }
+  ]
+}

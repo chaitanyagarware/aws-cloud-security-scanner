@@ -1,0 +1,18 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DevOpsTooBroad",
+      "Effect": "Allow",
+      "Action": [
+        "iam:PassRole",
+        "iam:AttachRolePolicy",
+        "iam:CreateAccessKey",
+        "ec2:*",
+        "s3:*",
+        "cloudtrail:StopLogging"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

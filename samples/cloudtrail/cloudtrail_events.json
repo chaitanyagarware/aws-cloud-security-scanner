@@ -1,0 +1,88 @@
+{
+  "Records": [
+    {
+      "eventVersion": "1.08",
+      "userIdentity": {
+        "type": "Root",
+        "principalId": "123456789012",
+        "arn": "arn:aws:iam::123456789012:root",
+        "accountId": "123456789012"
+      },
+      "eventTime": "2026-05-20T14:12:02Z",
+      "eventSource": "iam.amazonaws.com",
+      "eventName": "CreateAccessKey",
+      "awsRegion": "us-east-1",
+      "sourceIPAddress": "198.51.100.10",
+      "userAgent": "signin.amazonaws.com",
+      "requestParameters": {"userName": "legacy-admin"},
+      "responseElements": null
+    },
+    {
+      "eventVersion": "1.08",
+      "userIdentity": {
+        "type": "IAMUser",
+        "userName": "developer",
+        "arn": "arn:aws:iam::123456789012:user/developer"
+      },
+      "eventTime": "2026-05-20T14:21:44Z",
+      "eventSource": "signin.amazonaws.com",
+      "eventName": "ConsoleLogin",
+      "awsRegion": "us-east-1",
+      "sourceIPAddress": "203.0.113.77",
+      "userAgent": "Mozilla/5.0",
+      "additionalEventData": {"MFAUsed": "No"},
+      "responseElements": {"ConsoleLogin": "Success"}
+    },
+    {
+      "eventVersion": "1.08",
+      "userIdentity": {
+        "type": "AssumedRole",
+        "arn": "arn:aws:sts::123456789012:assumed-role/ci-deploy-role/github-actions"
+      },
+      "eventTime": "2026-05-20T15:03:18Z",
+      "eventSource": "iam.amazonaws.com",
+      "eventName": "AttachRolePolicy",
+      "awsRegion": "us-east-1",
+      "sourceIPAddress": "192.0.2.44",
+      "userAgent": "aws-cli/2.15.0 Python/3.11",
+      "requestParameters": {
+        "roleName": "app-runtime-role",
+        "policyArn": "arn:aws:iam::aws:policy/AdministratorAccess"
+      },
+      "responseElements": null
+    },
+    {
+      "eventVersion": "1.08",
+      "userIdentity": {
+        "type": "IAMUser",
+        "userName": "unknown-script",
+        "arn": "arn:aws:iam::123456789012:user/unknown-script"
+      },
+      "eventTime": "2026-05-20T16:31:54Z",
+      "eventSource": "cloudtrail.amazonaws.com",
+      "eventName": "StopLogging",
+      "awsRegion": "eu-west-1",
+      "sourceIPAddress": "198.51.100.222",
+      "userAgent": "python-requests/2.31.0",
+      "requestParameters": {"name": "org-cloudtrail"},
+      "responseElements": null
+    },
+    {
+      "eventVersion": "1.08",
+      "userIdentity": {
+        "type": "IAMUser",
+        "userName": "analyst",
+        "arn": "arn:aws:iam::123456789012:user/analyst"
+      },
+      "eventTime": "2026-05-20T17:01:09Z",
+      "eventSource": "s3.amazonaws.com",
+      "eventName": "PutBucketPolicy",
+      "awsRegion": "us-east-1",
+      "sourceIPAddress": "203.0.113.15",
+      "userAgent": "aws-cli/2.15.0",
+      "errorCode": "AccessDenied",
+      "errorMessage": "User is not authorized to perform s3:PutBucketPolicy",
+      "requestParameters": {"bucketName": "company-security-logs"}
+    }
+  ]
+}

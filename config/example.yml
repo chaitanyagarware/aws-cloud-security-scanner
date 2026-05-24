@@ -1,0 +1,32 @@
+trusted_principals:
+  - arn:aws:iam::000000000000:role/SecurityAutomationRole
+approved_regions:
+  - us-east-1
+  - us-east-2
+  - us-west-2
+sensitive_actions:
+  - iam:PassRole
+  - iam:CreateAccessKey
+  - iam:AttachUserPolicy
+  - iam:PutUserPolicy
+  - iam:CreatePolicyVersion
+  - sts:AssumeRole
+  - kms:Decrypt
+allowlisted_user_agents:
+  - aws-cli/2
+account_alias: sample-account
+organization_id: o-example
+environment: lab
+
+# Public-launch polish: suppress known exceptions with an owner/reason and expiration.
+suppressions:
+  - rule_id: CT-006
+    principal: arn:aws:iam::000000000000:role/SecurityAutomationRole
+    reason: approved cross-region security inventory job
+    expires: "2026-12-31"
+
+# Local business context can raise/lower severities without changing detector code.
+severity_overrides:
+  - rule_id: CT-004
+    severity: LOW
+    reason: expected denied calls from least-privilege validation canary
