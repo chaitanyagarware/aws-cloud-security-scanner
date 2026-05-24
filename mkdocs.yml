@@ -1,0 +1,8 @@
+site_name: AWS Cloud Security Scanner
+nav:
+  - Home: README.md
+  - Quick Scan: README-short.md
+  - Design Notes: docs/design-notes.md
+  - Rule Development: docs/rule-development.md
+  - Production Roadmap: docs/production-roadmap.md
+  - Interview Script: docs/interview-script.md
