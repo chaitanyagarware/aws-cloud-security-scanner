@@ -6,150 +6,175 @@
 ![Terraform](https://img.shields.io/badge/IaC-Terraform-844FBA)
 ![Security](https://img.shields.io/badge/focus-AWS%20Security-red)
 
-> Security Engineer portfolio project for AWS cloud security, identity blast-radius analysis, threat detection, and least-privilege remediation.
+A local-first AWS security analysis tool for reviewing IAM risk, CloudTrail activity, GuardDuty findings, and Access Analyzer results.
 
-This repository is a practical AWS security engineering lab. It analyzes realistic security telemetry and generates executive plus technical reports across:
+The project is designed to help security engineers turn raw AWS security artifacts into readable reports, machine-readable outputs, and remediation-focused findings.
 
-- IAM misconfiguration detection
-- CloudTrail behavior analysis
+It works with local sample data by default, so you can run the full demo without using real AWS credentials.
+
+---
+
+## What it does
+
+`aws-cloud-security-scanner` analyzes AWS security data across four main areas:
+
+- IAM policy and trust policy review
+- CloudTrail activity analysis
 - GuardDuty finding triage
-- IAM Access Analyzer JSON ingestion
-- Least-privilege review draft generation
-- Multi-source identity correlation
-- SARIF output for GitHub code scanning
-- ASFF-shaped output for AWS Security Hub style workflows
-- OCSF-like normalized export for security data lake workflows
-- MITRE ATT&CK Cloud mapping for detection engineering conversations
-- SQLite finding state for deduplication over time
-- Optional Bedrock executive summary path with local fallback
-- S3/Athena ingestion helper templates for production-scale CloudTrail
-- Terraform remediation review snippets
-- Optional Docker, Lambda, and Streamlit dashboard demo
+- IAM Access Analyzer finding ingestion
 
-The goal is not another screenshot-based AWS lab. The goal is to show how a Security Engineer thinks: identity blast radius, runtime behavior, detection quality, remediation safety, reporting, and production gaps.
+It then generates reports and exports that can be used for review, automation, or security workflow integration.
 
-## Recommended GitHub repository name
+Supported outputs include:
 
-Use this exact simple name for search visibility:
-
-```text
-aws-cloud-security-scanner
-```
-
-Good GitHub topics: `aws-security`, `cloud-security`, `iam-security`, `cloudtrail`, `guardduty`, `least-privilege`, `security-hub`, `sarif`, `asff`, `ocsf`, `mitre-attack`, `detection-engineering`, `security-engineering`.
-
+- Markdown report
+- JSON report
+- SARIF
+- ASFF-style findings
+- OCSF-style normalized output
+- Optional executive summary
+- SQLite finding state database
 
 ---
 
-## 30-second hiring-manager scan
+## Why I built it
 
-| Signal | Evidence in this repo |
-|---|---|
-| IAM security | Detects wildcard actions/resources, PassRole risk, privilege escalation, broad trust policies, and missing MFA conditions |
-| CloudTrail | Flags root usage, MFA gaps, IAM changes, denied calls, GuardDuty/CloudTrail tampering, suspicious user agents, and unusual regions |
-| GuardDuty | Normalizes findings, extracts affected identities/resources, maps response actions |
-| Access Analyzer | Ingests Access Analyzer-style findings and turns them into ranked engineering work |
-| Least privilege | Builds review-only IAM policy drafts from observed CloudTrail behavior |
-| Correlation | Builds incident storylines when the same identity appears across IAM, CloudTrail, GuardDuty, or Access Analyzer |
-| Production mindset | SARIF, ASFF, OCSF, MITRE, YAML config, SQLite state, Dockerfile, Lambda skeleton, CI, tests, Terraform, dashboard |
+AWS security findings are often noisy and disconnected.
+
+An IAM policy issue, a CloudTrail event, and a GuardDuty alert may all point to the same identity risk, but they usually appear in separate places.
+
+This project explores a simple question:
+
+> Can we connect identity risk, runtime activity, detection findings, and remediation guidance into one practical workflow?
+
+The goal is not to replace AWS-native services. The goal is to create a local, understandable, extensible security tool that shows how these signals can be analyzed together.
 
 ---
 
+## Core features
 
-## Production Hardening Added
+### IAM analysis
 
-This version includes hardening requested by QC review:
+The scanner reviews IAM policies and trust policies for common risk patterns, including:
 
-- Safe JSON loading with file existence, extension, malformed JSON, and size-limit checks.
-- Pydantic-based input validation for CloudTrail, GuardDuty, IAM Access Analyzer, and YAML config.
-- Structured logging support with `--json-logs` for CloudWatch-style pipelines.
-- Fixed least-privilege policy generation so CloudTrail `iam.amazonaws.com:CreateAccessKey` becomes valid IAM action syntax `iam:CreateAccessKey`; non-policy sign-in events are excluded from generated policies.
-- CLI error handling for missing files, malformed config, malformed JSON, and keyboard interruption.
-- Expanded pytest suite with coverage gate, CLI error-path tests, output-format tests, and policy normalization tests.
-- CI security checks: ruff, mypy, pytest coverage at 85%+, Bandit, pip-audit, Checkov/tfsec Terraform scans, SARIF upload, Dependabot, and pre-commit hooks.
-- MITRE ATT&CK tags, OCSF-like export, finding deduplication state, JSONL streaming support, GuardDuty principal/resource extraction, and optional Bedrock summary path.
+- Wildcard actions
+- Wildcard resources
+- Sensitive IAM permissions
+- `iam:PassRole` exposure
+- Privilege escalation paths
+- Broad trust relationships
+- Missing MFA conditions
+- Over-permissive access patterns
 
-See `README-short.md` for a recruiter/interviewer 30-second scan.
+### CloudTrail analysis
 
-## Architecture
+CloudTrail events are analyzed for suspicious or high-risk behavior, such as:
 
-```mermaid
-flowchart LR
-    IAM[IAM policies] --> A[Analyzer CLI]
-    CT[CloudTrail events] --> A
-    GD[GuardDuty findings] --> A
-    AA[IAM Access Analyzer JSON] --> A
-    CFG[YAML config: regions, allowlists, sensitive actions] --> A
-    A --> R[Risk model + correlation]
-    R --> MD[Markdown executive report]
-    R --> JSON[Structured JSON]
-    R --> SARIF[SARIF for GitHub code scanning]
-    R --> ASFF[ASFF-shaped Security Hub output]
-    R --> OCSF[OCSF-like security lake output]
-    R --> MITRE[MITRE ATT&CK mapping]
-    R --> STATE[SQLite finding state]
-    R --> LP[Least-privilege draft policies]
-    JSON --> UI[Streamlit dashboard]
-```
+- Root account usage
+- Console login without MFA
+- IAM policy changes
+- Access key creation
+- Failed authorization attempts
+- CloudTrail tampering attempts
+- GuardDuty disabling attempts
+- Suspicious user agents
+- Activity from unusual regions
+
+### GuardDuty analysis
+
+GuardDuty findings are normalized and enriched with:
+
+- Severity normalization
+- Principal extraction
+- Resource extraction
+- MITRE ATT&CK mapping
+- Response guidance
+- Cross-source correlation
+
+### Access Analyzer support
+
+The tool can ingest IAM Access Analyzer-style findings and convert them into reviewable security findings.
+
+Optional AWS API integration is also included for environments where read-only Access Analyzer access is available.
+
+### Correlation engine
+
+Findings from IAM, CloudTrail, GuardDuty, and Access Analyzer can be correlated by identity or resource.
+
+This helps build a clearer story around risk instead of showing isolated alerts.
+
+### Suppression and severity overrides
+
+A YAML config file can be used to:
+
+- Suppress known accepted findings
+- Override severity for business-specific context
+- Adjust trusted principals
+- Tune regions and behavior
+
+This is useful because real security tools need false-positive handling, not just detection logic.
+
+### Finding state
+
+The scanner can store finding fingerprints in SQLite to support simple deduplication and state tracking across runs.
 
 ---
 
 ## Quick start
 
+Create a virtual environment:
+
 ```bash
 python -m venv .venv
-source .venv/bin/activate      # Windows: .venv\\Scripts\\activate
+```
+
+Activate it:
+
+```bash
+# macOS/Linux
+source .venv/bin/activate
+
+# Windows
+.venv\\Scripts\\activate
+```
+
+Install the project:
+
+```bash
 pip install -e .[dev]
+```
+
+Run the demo:
+
+```bash
 ./scripts/run_demo.sh
 ```
 
-Or run the CLI directly:
+On Windows, run the CLI directly:
 
 ```bash
-aws-cloud-security-scanner analyze \
-  --iam samples/iam_policies \
-  --cloudtrail samples/cloudtrail/cloudtrail_events.json \
-  --guardduty samples/guardduty/guardduty_findings.json \
-  --access-analyzer samples/access_analyzer/findings.json \
-  --config config/example.yml \
-  --out reports/demo_report.md \
-  --json-out reports/demo_report.json \
-  --sarif-out reports/demo_report.sarif.json \
-  --asff-out reports/demo_report.asff.json
-reports/demo_report.ocsf.json
-reports/ai_summary.md
-reports/finding_state.sqlite \
-  --ocsf-out reports/demo_report.ocsf.json \
-  --state-db reports/finding_state.sqlite \
+aws-cloud-security-scanner analyze ^
+  --iam samples/iam_policies ^
+  --cloudtrail samples/cloudtrail/cloudtrail_events.json ^
+  --guardduty samples/guardduty/guardduty_findings.json ^
+  --access-analyzer samples/access_analyzer/findings.json ^
+  --config config/example.yml ^
+  --out reports/demo_report.md ^
+  --json-out reports/demo_report.json ^
+  --sarif-out reports/demo_report.sarif.json ^
+  --asff-out reports/demo_report.asff.json ^
+  --ocsf-out reports/demo_report.ocsf.json ^
+  --state-db reports/finding_state.sqlite ^
   --ai-summary-out reports/ai_summary.md
-```
-
-Run tests:
-
-```bash
-pytest --cov=src/cloudsec_aws_lab --cov-fail-under=85
-ruff check src tests
-```
-
-Docker demo:
-
-```bash
-docker build -t aws-cloud-security-scanner .
-docker run --rm -v "$PWD/reports:/app/reports" aws-cloud-security-scanner
-```
-
-Dashboard demo:
-
-```bash
-pip install streamlit pandas
-streamlit run dashboard/app.py
 ```
 
 ---
 
 ## Example outputs
 
-After running the demo, the repo generates:
+After running the demo, reports are generated under `reports/`.
+
+Common outputs:
 
 ```text
 reports/demo_report.md
@@ -163,122 +188,286 @@ reports/finding_state.sqlite
 
 The Markdown report includes:
 
-1. Executive summary
-2. Impact metrics
-3. Top risks ranked by severity
-4. IAM, CloudTrail, GuardDuty, and Access Analyzer findings
-5. Correlated identity-risk storylines
-6. Least-privilege review drafts
-7. Terraform remediation review snippets
-8. Interview-ready security narrative
+- Executive summary
+- Top findings
+- Severity-ranked risk list
+- IAM findings
+- CloudTrail findings
+- GuardDuty findings
+- Access Analyzer findings
+- Correlated identity-risk storylines
+- Least-privilege review drafts
+- Remediation notes
 
 ---
 
-## Detection coverage
+## Architecture
 
-### IAM misconfiguration checks
-
-- `Action: "*"`
-- Service-wide wildcards like `iam:*`, `s3:*`, `kms:*`, `ec2:*`
-- `Resource: "*"` on sensitive actions
-- Privilege escalation actions:
-  - `iam:PassRole`
-  - `iam:AttachUserPolicy`
-  - `iam:PutUserPolicy`
-  - `iam:CreateAccessKey`
-  - `sts:AssumeRole`
-- Trust policies with broad principals
-- Missing MFA conditions on sensitive access
-- Overbroad S3/KMS/IAM permissions
-
-### CloudTrail checks
-
-- Root account usage
-- Console login without MFA
-- IAM policy changes
-- Access key creation
-- Failed authorization attempts
-- GuardDuty disabling attempts
-- CloudTrail stop/delete attempts
-- KMS destructive actions
-- Suspicious user agents
-- API calls from uncommon regions
-
-### GuardDuty checks
-
-- Severity normalization
-- Affected principal extraction
-- Affected resource extraction
-- Finding-to-remediation mapping
-- Cross-source correlation by identity
-
-### IAM Access Analyzer support
-
-- Ingests exported findings/policy validation JSON
-- Converts Access Analyzer issues into ranked findings
-- Uses findings to support least-privilege planning
-- Includes review-only policy generation helper
-
----
-
-## Why this is stronger than a normal AWS lab
-
-Most portfolio labs stop at "I enabled GuardDuty" or "I created a vulnerable IAM policy." This project acts like a small internal cloud-security tool:
-
-- It separates analyzers, reporting, risk model, correlation, and remediation.
-- It produces machine-readable outputs that could plug into CI/CD or Security Hub workflows.
-- It calls out production gaps instead of pretending sample data equals production readiness.
-- It connects identity design, telemetry behavior, and alert triage into one storyline.
-
----
-
-## Production gaps and roadmap
-
-This project is intentionally safe and local by default. In production, the next steps would be:
-
-- S3 and Athena ingestion for large CloudTrail lakes
-- EventBridge near-real-time detection mode
-- AWS Organizations support for multi-account analysis
-- SCP, permission boundary, session policy, ABAC, and IAM Identity Center coverage
-- IAM Access Analyzer API integration for generated policies and unused access
-- Security Hub `BatchImportFindings` integration
-- OCSF mapping and finding deduplication
-- Bedrock/Claude-assisted triage summaries with privacy guardrails
-- CIS AWS Foundations, NIST, SOC2, and MITRE ATT&CK Cloud mapping
-
-See `docs/production-roadmap.md` for the full roadmap.
-
----
-
-## Interview positioning
-
-Use this repo to say:
-
-> I built a Python-based AWS cloud security lab that detects IAM misconfigurations, analyzes CloudTrail behavior, triages GuardDuty findings, ingests IAM Access Analyzer exports, correlates identity risk across sources, and produces least-privilege remediation reports in Markdown, JSON, SARIF, and ASFF-style formats.
-
-Recommended GitHub description:
-
-> AWS cloud security lab for IAM risk analysis, CloudTrail threat hunting, GuardDuty triage, Access Analyzer findings, and least-privilege remediation.
-
-Recommended GitHub topics:
+The project is organized around small, separate components:
 
 ```text
-aws cloud-security iam cloudtrail guardduty terraform least-privilege access-analyzer security-hub sarif asff threat-detection security-engineering python
+src/cloudsec_aws_lab/
+  analyzers/        # IAM, CloudTrail, GuardDuty, Access Analyzer analysis
+  reporting/        # Markdown, JSON, SARIF, ASFF, OCSF outputs
+  correlation/      # Multi-source identity/resource correlation
+  config/           # YAML config, suppressions, severity overrides
+  state/            # SQLite finding state and deduplication
+  remediation/      # Least-privilege and Terraform remediation helpers
+  integrations/     # Optional AWS API integrations
+  cli.py            # Main command-line interface
+```
+
+The basic flow is:
+
+```text
+Input files
+  ↓
+Validation and safe loading
+  ↓
+Source-specific analyzers
+  ↓
+Finding normalization
+  ↓
+Correlation and enrichment
+  ↓
+Suppression / severity override
+  ↓
+Reports and machine-readable exports
 ```
 
 ---
 
-## Safety note
+## Output formats
 
-This project uses local sample data by default and does not require AWS credentials. If extended to real AWS accounts, use read-only roles, anonymize logs, and never commit credentials, account IDs, access keys, session tokens, or production CloudTrail data.
+### Markdown
 
-## Public Launch Polish
+Human-readable report for review and discussion.
 
-- Simple search-friendly repo name: `aws-cloud-security-scanner`.
-- YAML suppression rules and severity overrides for known business exceptions.
-- Optional IAM Access Analyzer API ingestion through `--access-analyzer-api`.
-- JSONL streaming for larger CloudTrail exports.
-- S3/Athena workflow documented in `docs/s3-athena-access-analyzer.md`.
-- Bedrock summaries are opt-in; local executive summary is the safe default.
-- Reusable composite GitHub Action lives in `.github/actions/aws-cloud-security-scan`.
-- EventBridge/Lambda deployment skeleton lives in `terraform/eventbridge_lambda`.
+### JSON
+
+Structured output for automation and further processing.
+
+### SARIF
+
+Useful for GitHub code scanning style workflows.
+
+### ASFF-style output
+
+Modeled after AWS Security Finding Format concepts for Security Hub-style workflows.
+
+### OCSF-style output
+
+Normalized output inspired by security data lake workflows.
+
+---
+
+## Configuration
+
+Example config:
+
+```yaml
+trusted_principals:
+  - arn:aws:iam::123456789012:role/SecurityAuditRole
+
+allowed_regions:
+  - us-east-1
+  - us-west-2
+
+severity_overrides:
+  - match:
+      finding_type: IAM_WILDCARD_ACTION
+    severity: HIGH
+    reason: Wildcard IAM access is considered high risk in this environment.
+
+suppressions:
+  - id: accepted-demo-risk
+    match:
+      finding_type: CLOUDTRAIL_UNUSUAL_REGION
+    reason: Known test activity in sample data.
+    expires: 2026-12-31
+```
+
+Suppression and override logic is intentionally config-driven so users can tune the scanner without changing Python code.
+
+---
+
+## Security and safety
+
+This project is safe by default:
+
+- Uses local sample data
+- Does not require AWS credentials for the demo
+- Does not modify AWS resources
+- Does not perform exploitation
+- Does not send data externally by default
+
+If used with real AWS data:
+
+- Use read-only IAM roles
+- Avoid committing account IDs, keys, tokens, or production logs
+- Review generated remediation before applying anything
+- Treat AI-generated summaries as review assistance, not final decisions
+
+---
+
+## Optional AWS integrations
+
+The project includes optional integration paths for production-style workflows:
+
+- IAM Access Analyzer API ingestion
+- S3/Athena workflow documentation
+- EventBridge/Lambda deployment skeleton
+- Bedrock summary path with local fallback
+
+These are optional. The scanner can still run fully offline with sample data.
+
+---
+
+## Dashboard
+
+A simple Streamlit dashboard is included for reviewing findings visually.
+
+Run it with:
+
+```bash
+pip install streamlit pandas
+streamlit run dashboard/app.py
+```
+
+The dashboard supports:
+
+- Severity filtering
+- MITRE ATT&CK filtering
+- Finding search
+- Basic charts
+- Report exploration
+
+---
+
+## Terraform examples
+
+Terraform examples are included for:
+
+- Remediation review snippets
+- EventBridge/Lambda deployment skeleton
+- IaC security scanning examples
+
+The CI workflow includes optional Checkov/tfsec scanning for Terraform files.
+
+---
+
+## Development
+
+Run tests:
+
+```bash
+pytest --cov=src/cloudsec_aws_lab --cov-fail-under=85
+```
+
+Run linting:
+
+```bash
+ruff check src tests
+```
+
+Run type checks:
+
+```bash
+mypy src
+```
+
+Run security checks:
+
+```bash
+bandit -r src
+pip-audit
+```
+
+---
+
+## CI checks
+
+The GitHub Actions workflow includes:
+
+- Ruff
+- Mypy
+- Pytest with coverage
+- Bandit
+- pip-audit
+- Checkov/tfsec for Terraform
+- SARIF generation path
+- Pre-commit support
+- Dependabot configuration
+
+---
+
+## Adding a new rule
+
+Rules should be small, testable, and explainable.
+
+A good rule should include:
+
+- Clear finding type
+- Severity
+- Evidence
+- Affected principal or resource
+- Remediation guidance
+- MITRE mapping if applicable
+- Unit test
+- Sample input if useful
+
+See:
+
+```text
+docs/rule-development.md
+```
+
+---
+
+## Roadmap
+
+Possible future improvements:
+
+- Deeper AWS Organizations support
+- SCP analysis
+- IAM Identity Center analysis
+- Permission boundary and session policy analysis
+- More OCSF mappings
+- Security Hub BatchImportFindings integration
+- Athena query runner
+- Better least-privilege policy generation
+- More dashboard views
+- More real-world test cases
+
+---
+
+## Repository topics
+
+Suggested GitHub topics:
+
+```text
+aws
+cloud-security
+aws-security
+iam
+cloudtrail
+guardduty
+access-analyzer
+security-engineering
+security-automation
+devsecops
+mitre-attack
+sarif
+security-hub
+ocsf
+terraform
+python
+least-privilege
+cloud-detection-response
+```
+
+---
+
+## License
+
+MIT License.
