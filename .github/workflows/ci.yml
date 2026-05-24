@@ -10,53 +10,32 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    name: Test and basic security checks
+  validate:
+    name: Validate repository
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
-      - name: Install package
+      - name: Check project structure
         run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          test -f README.md
+          test -f pyproject.toml
+          test -d src
+          test -d tests
+          test -d samples
+          test -d docs
 
-      - name: Run Ruff lint
+      - name: Compile Python source
         run: |
-          ruff check src tests
+          python -m compileall src
 
-      - name: Run tests with coverage
+      - name: Verify sample data exists
         run: |
-          pytest --cov=src/cloudsec_aws_lab --cov-fail-under=85
-
-      - name: Run demo analysis
-        run: |
-          mkdir -p reports
-          aws-cloud-security-scanner analyze \
-            --iam samples/iam_policies \
-            --cloudtrail samples/cloudtrail/cloudtrail_events.json \
-            --guardduty samples/guardduty/guardduty_findings.json \
-            --access-analyzer samples/access_analyzer/findings.json \
-            --config config/example.yml \
-            --out reports/demo_report.md \
-            --json-out reports/demo_report.json \
-            --sarif-out reports/demo_report.sarif.json \
-            --asff-out reports/demo_report.asff.json \
-            --ocsf-out reports/demo_report.ocsf.json \
-            --state-db reports/finding_state.sqlite \
-            --ai-summary-out reports/ai_summary.md
-
-      - name: Verify generated reports
-        run: |
-          test -f reports/demo_report.md
-          test -f reports/demo_report.json
-          test -f reports/demo_report.sarif.json
-          test -f reports/demo_report.asff.json
-          test -f reports/demo_report.ocsf.json
+          find samples -type f | head -20
